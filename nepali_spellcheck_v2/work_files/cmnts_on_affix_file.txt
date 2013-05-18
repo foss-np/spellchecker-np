@@ -1,0 +1,4 @@
+1. modify the TRY sequence. A good way to develop this string is to sort a simple character count of a word list.
+
+नराम्रो न (17) ‌‌+ राम्रो
+पोखरातिरकाहरुलाई पोखरा‌ + तिर (22) + का (13) + हरु (absent in .dic and .aff file) + लाई (15)

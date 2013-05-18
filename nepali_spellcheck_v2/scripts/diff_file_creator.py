@@ -1,9 +1,10 @@
-import sys
-target=open('ne_NP.txt','w')
+from sys import argv
+script, sourcefile, compfile, targetfile = argv
+target=open(targetfile,'w')
 target.truncate()
-with open('all_new.txt') as a:
+with open(sourcefile) as a:
     for line in a:
-        with open('ne_NP_wordsonly.txt') as b:
+        with open(compfile) as b:
             exists_not=True
             for data in b:
                 if data==line:

@@ -1,7 +1,8 @@
-import sys
-target=open('ne_NP_wordsonly.txt','w')
+from sys import argv
+script, sourcefile, targetfile = argv
+target=open(targetfile,'w')
 target.truncate()
-with open('ne_NP_old.dic') as b:
+with open(sourcefile) as b:
     for data in b:
         i=data.find('/')
         target.write(data[0:i]+'\n')
