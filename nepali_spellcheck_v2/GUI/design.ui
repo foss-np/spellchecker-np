@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>688</width>
+    <width>671</width>
     <height>481</height>
    </rect>
   </property>
@@ -15,6 +15,10 @@
   </property>
   <property name="windowTitle">
    <string>Nepali SpellChecker v2.0</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>Resources/mpplogo.gif</normaloff>Resources/mpplogo.gif</iconset>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>
@@ -56,7 +60,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>688</width>
+     <width>671</width>
      <height>25</height>
     </rect>
    </property>
@@ -76,6 +80,7 @@
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
@@ -83,6 +88,9 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
@@ -94,11 +102,20 @@
     <addaction name="actionUpdate"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionSearch"/>
+    <addaction name="actionReplace"/>
+    <addaction name="separator"/>
+    <addaction name="actionGoto"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
    <property name="contextMenuPolicy">
     <enum>Qt::NoContextMenu</enum>
@@ -113,7 +130,23 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QToolBar" name="formatBar">
+   <property name="windowTitle">
+    <string>toolBar_2</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/New.png</normaloff>Resources/New.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;New</string>
    </property>
@@ -125,6 +158,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Open.png</normaloff>Resources/Open.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
@@ -136,6 +173,10 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Save.png</normaloff>Resources/Save.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -147,6 +188,10 @@
    </property>
   </action>
   <action name="actionClose">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Close.png</normaloff>Resources/Close.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Close</string>
    </property>
@@ -158,6 +203,10 @@
    </property>
   </action>
   <action name="actionCut">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Cut.png</normaloff>Resources/Cut.png</iconset>
+   </property>
    <property name="text">
     <string>C&amp;ut</string>
    </property>
@@ -169,6 +218,10 @@
    </property>
   </action>
   <action name="actionCopy">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Copy.png</normaloff>Resources/Copy.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Copy</string>
    </property>
@@ -180,8 +233,12 @@
    </property>
   </action>
   <action name="actionPaste">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Paste.png</normaloff>Resources/Paste.png</iconset>
+   </property>
    <property name="text">
-    <string>&amp;Paste</string>
+    <string>&amp;Paste               </string>
    </property>
    <property name="statusTip">
     <string>Paste copied text</string>
@@ -191,13 +248,96 @@
    </property>
   </action>
   <action name="actionUpdate">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Update.png</normaloff>Resources/Update.png</iconset>
+   </property>
    <property name="text">
-    <string>&amp;Update</string>
+    <string>&amp;Update              </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+U</string>
    </property>
   </action>
   <action name="actionAbout">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/About.png</normaloff>Resources/About.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/SaveAs.png</normaloff>Resources/SaveAs.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save &amp;As             </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Undo.png</normaloff>Resources/Undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Redo.png</normaloff>Resources/Redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/Find.png</normaloff>Resources/Find.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Find</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionReplace">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/FindReplace.png</normaloff>Resources/FindReplace.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Replace             </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+R</string>
+   </property>
+  </action>
+  <action name="actionGoto">
+   <property name="icon">
+    <iconset>
+     <normaloff>Resources/GoTo.png</normaloff>Resources/GoTo.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Goto</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>
