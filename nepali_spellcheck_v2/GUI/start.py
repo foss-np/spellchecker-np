@@ -16,7 +16,8 @@ class NepalSCGUI(QtGui.QMainWindow):
         QtGui.QWidget.__init__(self,parent)
         self.ui=Ui_Spellcheck()
         self.ui.setupUi(self)
-
+        self.hidewidgets()
+        
         #Transparency control
         #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         #self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
@@ -34,7 +35,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         #sshFile="stylesheets/qdarkstyle/style.qss"
         #with open(sshFile,"r") as fh:
         #   self.setStyleSheet(fh.read())
-    
+        
         #actions for toolbar         
         self.mppAction = QtGui.QAction(QtGui.QIcon('Resources/mpplogo.gif'), 'Madan Puraskar Pustakalaya', self)
         self.newAction = QtGui.QAction(QtGui.QIcon('Resources/New.png'), 'New', self)
@@ -98,7 +99,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.zoomin_button = QtGui.QToolButton(self)
         self.zoomin_button.setIcon(QtGui.QIcon('Resources/list-add.png'))
         self.zoomin_button.setAutoRaise(True)
-        self.zoomin_button.setCheckable(True)
+        self.zoomin_button.setCheckable(False)
         self.zoomin_button.setShortcut(QtGui.QKeySequence('Ctrl++'))
         self.zoomin_button.setToolTip('Zoom in')
         self.zoomin_button.clicked.connect(self.ui.textEdit.zoomIn)
@@ -106,7 +107,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.zoomout_button = QtGui.QToolButton(self)
         self.zoomout_button.setIcon(QtGui.QIcon('Resources/list-remove.png'))
         self.zoomout_button.setAutoRaise(True)
-        self.zoomout_button.setCheckable(True)
+        self.zoomout_button.setCheckable(False)
         self.zoomout_button.setShortcut(QtGui.QKeySequence('Ctrl+-'))
         self.zoomout_button.setToolTip('Zoom out')
         self.zoomout_button.clicked.connect(self.ui.textEdit.zoomOut)
@@ -170,9 +171,14 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionCopy.triggered.connect(self.ui.textEdit.copy)
         self.ui.actionPaste.triggered.connect(self.ui.textEdit.paste)
         self.ui.actionUndo.triggered.connect(self.ui.textEdit.undo)
-        self.ui.actionRedo.triggered.connect(self.ui.textEdit.redo)	
+        self.ui.actionRedo.triggered.connect(self.ui.textEdit.redo)
+        self.ui.actionGoto.triggered.connect(self.gotoline)
+        self.ui.actionSearch.triggered.connect(self.find)
+        self.ui.actionReplace.triggered.connect(self.replace)
         self.watcher.fileChanged.connect(self.file_changed)
         self.mppAction.triggered.connect(self.open_mpp)
+        self.EscAction = QtGui.QShortcut(QtGui.QKeySequence(self.tr("Esc")), self);
+        self.EscAction.activated.connect(self.hidewidgets)
         self.ui.actionSave.setEnabled(False)
         self.saveAction.setEnabled(False)
         self.filename=""
@@ -181,6 +187,12 @@ class NepalSCGUI(QtGui.QMainWindow):
 
     def open_mpp(self):
         webbrowser.open('http://madanpuraskar.org/')
+        
+    def hidewidgets(self):
+        self.ui.Gotowidget.hide()
+        self.ui.Findwidget.hide()
+        self.ui.Replacewidget.hide()
+        self.ui.textEdit.setFocus()
         
     def save_enable(self):
         self.ui.actionSave.setEnabled(True)
@@ -341,8 +353,102 @@ class NepalSCGUI(QtGui.QMainWindow):
     def update_text(self):
         self.update_alignment()
         self.update_color()
-
         
+    def gotoline(self):
+        self.ui.Gotowidget.show()
+        self.ui.lineNo.setFocus()
+        self.ui.lineNo.returnPressed.connect(self.gotoaction)
+        self.ui.GoButton.clicked.connect(self.gotoaction)
+       
+    def gotoaction(self):
+        ln=int(self.ui.lineNo.text())
+        self.ui.Gotowidget.hide()
+        if (ln==None): return
+        cursor=self.ui.textEdit.textCursor()
+        block=self.ui.textEdit.document().findBlockByLineNumber(ln)
+        pos=block.position()
+        cursor.setPosition(pos)
+        self.ui.textEdit.setTextCursor(cursor)
+        self.ui.textEdit.setFocus()        
+            
+    def find(self):
+        if self.ui.Replacewidget.isVisible():
+            self.ui.Replacewidget.hide()
+        self.ui.Findwidget.show()
+        self.ui.SearchKey.setFocus()
+        self.ui.SearchKey.returnPressed.connect(self.doFind)
+        self.ui.next.clicked.connect(self.doFind)
+        self.ui.previous.clicked.connect(self.doFindBackwards)
+
+    def doFindBackwards (self):
+        return self.doFind(backwards=True)
+
+    def doFind(self, backwards=False):
+        rotationIncomplete=True
+        flags=QtGui.QTextDocument.FindFlags()
+        if backwards:
+            flags=QtGui.QTextDocument.FindBackward
+        if self.ui.MatchCase.isChecked():
+            flags=flags|QtGui.QTextDocument.FindCaseSensitively
+        if self.ui.Findwidget.isVisible():
+            text=unicode(self.ui.SearchKey.text())
+        elif self.ui.Replacewidget.isVisible():
+            text=unicode(self.ui.OldText.text())
+        r=self.ui.textEdit.find(text,flags)
+        if r==False:
+            if rotationIncomplete:
+                self.ui.textEdit.moveCursor(QtGui.QTextCursor.Start)
+                rotationIncomplete=False
+            else:
+                QMessageBox.information(self, "End of Search", "No more occurences of the word can be found.")
+        
+    def replace(self):
+        if self.ui.Findwidget.isVisible():
+            self.ui.Findwidget.hide()
+        self.ui.Replacewidget.show()
+        self.ui.OldText.setFocus()
+        self.ui.OldText.returnPressed.connect(self.doFind)
+        self.ui.next_2.clicked.connect(self.doFind)
+        self.ui.previous_2.clicked.connect(self.doFindBackwards)
+        self.ui.replace.clicked.connect(self.doReplace)
+        self.ui.r_all.clicked.connect(self.doReplaceAll)
+
+    def doReplace(self, backwards=False):
+        cursor=self.ui.textEdit.textCursor()
+        if cursor.hasSelection():
+            cursor.insertText(self.ui.NewText.text())
+        else:
+            flags=QtGui.QTextDocument.FindFlags()
+            if backwards:
+                flags=QtGui.QTextDocument.FindBackward
+            if self.ui.MatchCase_2.isChecked():
+                flags=flags|QtGui.QTextDocument.FindCaseSensitively
+            text=unicode(self.ui.OldText.text())
+            r=self.ui.textEdit.find(text,flags)
+            if cursor.hasSelection():
+                cursor.insertText(self.ui.NewText.text())
+            if r==False:
+                QMessageBox.information(self, "End of Search", "No more occurences of the word can be found.")
+        
+    def doReplaceAll(self):
+        cursor=self.ui.textEdit.textCursor()
+        cursor.beginEditBlock()
+        flags=QtGui.QTextDocument.FindFlags()
+        if self.ui.MatchCase_2.isChecked():
+            flags=flags|QtGui.QTextDocument.FindCaseSensitively
+        text=unicode(self.ui.OldText.text())
+        self.ui.textEdit.moveCursor(QtGui.QTextCursor.Start)
+        while True:
+            r=self.ui.textEdit.find(text,flags)
+            if r:
+                qc=self.ui.textEdit.textCursor()
+                if qc.hasSelection():
+                    qc.insertText(self.ui.NewText.text())
+            else:
+                QMessageBox.information(self, "End of Search", "All occurences replaced.")    
+                break
+        cursor.endEditBlock()
+            
 if __name__=="__main__":
     app=QtGui.QApplication(sys.argv)
     myapp=NepalSCGUI()
