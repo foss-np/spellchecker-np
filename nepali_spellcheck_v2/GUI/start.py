@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
+from PyQt4.Qt import QSyntaxHighlighter, QAction, QTextCharFormat, QTextCursor, QMenu, QMouseEvent, QTextEdit
 from PyQt4 import QtGui,QtCore
 from PyQt4.QtGui import QMessageBox, QApplication, QMainWindow, QFileDialog
 from PyQt4.QtCore import *
@@ -10,33 +11,29 @@ import codecs
 from os.path import isfile
 import resources
 import webbrowser
-    
+import hunspell
+import regex
+
+
 class NepalSCGUI(QtGui.QMainWindow):
     def __init__(self,parent=None):
         QtGui.QWidget.__init__(self,parent)
         self.ui=Ui_Spellcheck()
         self.ui.setupUi(self)
         self.hidewidgets()
-        
-        #Transparency control
-        #self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        #self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        #self.ui.textEdit.setStyleSheet("background: rgba(0,0,0,20%)")
-        #self.ui.toolBar.setStyleSheet("background: rgba(0,0,0,20%)")
-        #self.ui.menubar.setStyleSheet("background: rgba(0,0,0,20%)")
-        #self.ui.statusbar.setStyleSheet("background: rgba(0,0,0,20%)")
-        
-        #CSS Importing 1
-        sshFile="stylesheets/DarkOrange/darkorange.stylesheet"
-        with open(sshFile,"r") as fh:
-           self.setStyleSheet(fh.read())
-
-        #CSS Importing 2
-        #sshFile="stylesheets/qdarkstyle/style.qss"
-        #with open(sshFile,"r") as fh:
-        #   self.setStyleSheet(fh.read())
-        
-        #actions for toolbar         
+        self.checker=hunspell.HunSpell('hunspell/ne_NP.dic','hunspell/ne_NP.aff')
+        self.highlighter = Highlighter(self.ui.textEdit.document())
+        self.highlighter.setDict(self.checker)
+        self.ui.toolBar.setContextMenuPolicy(Qt.NoContextMenu)
+        self.ui.formatBar.setContextMenuPolicy(Qt.NoContextMenu)
+        self.ui.textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.ui.textEdit.customContextMenuRequested.connect(self.showContextMenu)
+        self.ui.textEdit.mousePressedSignal.connect(self.OnMousePressed)
+        for i in range(1,3):
+            self.ui.textEdit.zoomIn()
+        #self.importCSS('DarkOrange/darkorange.stylesheet')
+        #self.importCSS('qdarkstyle/style.qss')
+        #Define actions for toolbar         
         self.mppAction = QtGui.QAction(QtGui.QIcon('Resources/mpplogo.gif'), 'Madan Puraskar Pustakalaya', self)
         self.newAction = QtGui.QAction(QtGui.QIcon('Resources/New.png'), 'New', self)
         self.openAction = QtGui.QAction(QtGui.QIcon('Resources/Open.png'), 'Open', self)
@@ -46,78 +43,25 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.copyAction = QtGui.QAction(QtGui.QIcon('Resources/Copy.png'), 'Copy', self)
         self.pasteAction = QtGui.QAction(QtGui.QIcon('Resources/Paste.png'), 'Paste', self)
         self.closeAction = QtGui.QAction(QtGui.QIcon('Resources/Close.png'), 'Close', self)
-        
-        #Buttons
+        #Define Buttons
         self.bold_button = QtGui.QToolButton(self)
-        self.bold_button.setIcon(QtGui.QIcon('Resources/format-text-bold.png'))
-        self.bold_button.setAutoRaise(True)
-        self.bold_button.setCheckable(True)
-        self.bold_button.setShortcut(QtGui.QKeySequence('Ctrl+B'))
-        self.bold_button.setToolTip('Bold')
-        self.bold_button.clicked.connect(self.set_bold)
-
+        self.defineButton(self.bold_button,'Resources/format-text-bold.png',True,True,'Ctrl+B','Bold',self.set_bold)
         self.italic_button = QtGui.QToolButton(self)
-        self.italic_button.setIcon(QtGui.QIcon('Resources/format-text-italic.png'))
-        self.italic_button.setAutoRaise(True)
-        self.italic_button.setCheckable(True)
-        self.italic_button.setShortcut(QtGui.QKeySequence('Ctrl+I'))
-        self.italic_button.setToolTip('Italic')
-        self.italic_button.clicked.connect(self.set_italic)
-
+        self.defineButton(self.italic_button,'Resources/format-text-italic.png',True,True,'Ctrl+I','Italic',self.set_italic)
         self.underline_button = QtGui.QToolButton(self)
-        self.underline_button.setIcon(QtGui.QIcon('Resources/format-text-underline.png'))
-        self.underline_button.setAutoRaise(True)
-        self.underline_button.setCheckable(True)
-        self.underline_button.setShortcut(QtGui.QKeySequence('Ctrl+U'))
-        self.underline_button.setToolTip('Underline')
-        self.underline_button.clicked.connect(self.set_underline)
-
+        self.defineButton(self.underline_button,'Resources/format-text-underline.png',True,True,'Ctrl+U','Underline',self.set_underline)
         self.alignleft_button = QtGui.QToolButton(self)
-        self.alignleft_button.setIcon(QtGui.QIcon('Resources/format-justify-left.png'))
-        self.alignleft_button.setAutoRaise(True)
-        self.alignleft_button.setCheckable(True)
-        self.alignleft_button.setShortcut(QtGui.QKeySequence('Ctrl+L'))
-        self.alignleft_button.setToolTip('Align left')
-        self.alignleft_button.clicked.connect(self.set_alignleft)
-
+        self.defineButton(self.alignleft_button,'Resources/format-justify-left.png',True,True,'Ctrl+L','Align Left',self.set_alignleft)
         self.aligncenter_button = QtGui.QToolButton(self)
-        self.aligncenter_button.setIcon(QtGui.QIcon('Resources/format-justify-center.png'))
-        self.aligncenter_button.setAutoRaise(True)
-        self.aligncenter_button.setCheckable(True)
-        self.aligncenter_button.setShortcut(QtGui.QKeySequence('Ctrl+E'))
-        self.aligncenter_button.setToolTip('Align Center')
-        self.aligncenter_button.clicked.connect(self.set_aligncenter)
-
+        self.defineButton(self.aligncenter_button,'Resources/format-justify-center.png',True,True,'Ctrl+E','Align Center',self.set_aligncenter)
         self.alignright_button = QtGui.QToolButton(self)
-        self.alignright_button.setIcon(QtGui.QIcon('Resources/format-justify-right.png'))
-        self.alignright_button.setAutoRaise(True)
-        self.alignright_button.setCheckable(True)
-        self.alignright_button.setShortcut(QtGui.QKeySequence('Ctrl+R'))
-        self.alignright_button.setToolTip('Align Right')
-        self.alignright_button.clicked.connect(self.set_alignright)
-
+        self.defineButton(self.alignright_button,'Resources/format-justify-right.png',True,True,'Ctrl+R','Align Right',self.set_alignright)
         self.zoomin_button = QtGui.QToolButton(self)
-        self.zoomin_button.setIcon(QtGui.QIcon('Resources/list-add.png'))
-        self.zoomin_button.setAutoRaise(True)
-        self.zoomin_button.setCheckable(False)
-        self.zoomin_button.setShortcut(QtGui.QKeySequence('Ctrl++'))
-        self.zoomin_button.setToolTip('Zoom in')
-        self.zoomin_button.clicked.connect(self.ui.textEdit.zoomIn)
-        
+        self.defineButton(self.zoomin_button,'Resources/list-add.png',True,False,'Ctrl++','Zoom In',self.ui.textEdit.zoomIn)
         self.zoomout_button = QtGui.QToolButton(self)
-        self.zoomout_button.setIcon(QtGui.QIcon('Resources/list-remove.png'))
-        self.zoomout_button.setAutoRaise(True)
-        self.zoomout_button.setCheckable(False)
-        self.zoomout_button.setShortcut(QtGui.QKeySequence('Ctrl+-'))
-        self.zoomout_button.setToolTip('Zoom out')
-        self.zoomout_button.clicked.connect(self.ui.textEdit.zoomOut)
-        
+        self.defineButton(self.zoomout_button,'Resources/list-remove.png',True,False,'Ctrl+-','Zoom Out',self.ui.textEdit.zoomOut)
         self.color_button = QtGui.QToolButton(self)
-        self.color_button.setIcon(QtGui.QIcon('Resources/color.png'))
-        self.color_button.setAutoRaise(True)
-        self.color_button.setToolTip('Color')
-        self.color_button.clicked.connect(self.set_color)
-
+        self.defineButton(self.color_button,'Resources/color.png',True,False,None,'Color',self.set_color)
         #toolbar sequencing
         self.ui.menubar.setContextMenuPolicy(Qt.NoContextMenu)
         self.ui.toolBar.setContextMenuPolicy(Qt.NoContextMenu)
@@ -129,7 +73,6 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.toolBar.addAction(self.saveAsAction)
         self.ui.toolBar.addSeparator()
         self.ui.toolBar.addAction(self.closeAction)
-        
         #formatbar sequencing
         self.ui.formatBar.setIconSize(QSize(22,22))
         self.ui.formatBar.addAction(self.mppAction)
@@ -150,7 +93,6 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.formatBar.addSeparator()
         self.ui.formatBar.addWidget(self.zoomin_button)
         self.ui.formatBar.addWidget(self.zoomout_button)
-        
         #slots
         self.watcher=QtCore.QFileSystemWatcher(self)
         self.newAction.triggered.connect(self.file_new)
@@ -161,7 +103,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.copyAction.triggered.connect(self.ui.textEdit.copy)
         self.pasteAction.triggered.connect(self.ui.textEdit.paste)
         self.closeAction.triggered.connect(self.close)
-        
+        self.ui.actionAbout.triggered.connect(self.about)
         self.ui.actionClose.triggered.connect(self.close)        
         self.ui.actionOpen.triggered.connect(self.file_open)
         self.ui.actionNew.triggered.connect(self.file_new)
@@ -182,31 +124,45 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionSave.setEnabled(False)
         self.saveAction.setEnabled(False)
         self.filename=""
-        self.ui.textEdit.setStyleSheet("QTextEdit {color:white}")
+        #self.ui.textEdit.setStyleSheet("QTextEdit {color:white}")
         self.update_text()
-
+    #Imports CSS stylesheet to the QMainWindow    
+    def importCSS(self, path):
+        sshFile="stylesheets/"+path
+        with open(sshFile,"r") as fh:
+           self.setStyleSheet(fh.read())
+    #Links to MPP website
     def open_mpp(self):
         webbrowser.open('http://madanpuraskar.org/')
-        
+    #Hides extra widgets
     def hidewidgets(self):
         self.ui.Gotowidget.hide()
         self.ui.Findwidget.hide()
         self.ui.Replacewidget.hide()
         self.ui.textEdit.setFocus()
-        
+    #Defines Button Actions
+    def defineButton(self,button, Icon, Raise, Check, Shortcut, Tooltip, Action):
+        button.setIcon(QtGui.QIcon(Icon))
+        button.setAutoRaise(Raise)
+        button.setCheckable(Check)
+        button.setShortcut(QtGui.QKeySequence(Shortcut))
+        button.setToolTip(Tooltip)
+        button.clicked.connect(Action)
+        return button
+    #Enables Save feature
     def save_enable(self):
         self.ui.actionSave.setEnabled(True)
         self.saveAction.setEnabled(True)
         if self.filename:
             self.setWindowTitle(unicode(self.objectName()+" - " + self.filename + "[*]") )
-
+    #Creates new file
     def file_new(self):
         if self.savecheck_dialog():
             return
         self.ui.textEdit.setText('')
         self.ui.actionSave.setEnabled(False)
         self.saveAction.setEnabled(False)
-        
+    #Opens existing File
     def file_open(self):
         if self.savecheck_dialog():
             return
@@ -222,14 +178,19 @@ class NepalSCGUI(QtGui.QMainWindow):
             self.saveAction.setEnabled(False)
             self.watcher.addPath(self.filename)
             self.setWindowTitle(unicode(self.objectName()+" - " + self.filename) )
-    
+    #Checks if file has been changed
     def file_changed(self,path):
         res=QMessageBox.question(self, "%s - File has been changed" %self.objectName(),"The opened document has been modified by another program.\n"+"Do you want to reload the file?",QMessageBox.Yes|QMessageBox.No|(QMessageBox.Save if self.button.actionSave.isEnabled() else 0),QMessageBox.Yes)
         if res == QMessageBox.Yes:
             self.file_open(self.filename)
         elif res == QMessageBox.Save:
             self.file_save()
-            
+    #AboutBox
+    def about(self):
+        res=QMessageBox.about(self, "%s - About" %self.objectName(),"Nepali Spellchecker v2 is a small software created by Language and Technology Kendra (LTK) a division of Madan Puraskar Pustakalaya.\n"+"All rights reserved.")
+        if res == QMessageBox.Ok:
+            return
+    #Saves file
     def file_save(self):
         from os.path import isfile
         self.watcher.removePath(self.filename)
@@ -242,7 +203,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionSave.setEnabled(False)
         self.saveAction.setEnabled(False)
         self.watcher.addPath(self.filename)
-
+    #SaveAs feature
     def file_saveAs(self):
         from os.path import isfile
         self.watcher.removePath(self.filename)
@@ -254,7 +215,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionSave.setEnabled(False)
         self.saveAction.setEnabled(False)
         self.watcher.addPath(self.filename)
-
+    #Dialog Box before closing
     def savecheck_dialog(self):    
         if not self.ui.actionSave.isEnabled():
             return  
@@ -263,13 +224,13 @@ class NepalSCGUI(QtGui.QMainWindow):
         if res==QMessageBox.Save:
             self.file_save()
         return res==QMessageBox.Cancel
-        
+    
     def closeEvent(self,event):
         if self.savecheck_dialog():
             event.ignore()
         else:
             event.accept()
-
+    
     def set_bold(self):
         if self.bold_button.isChecked():
             self.ui.textEdit.setFocus(Qt.OtherFocusReason)
@@ -353,7 +314,7 @@ class NepalSCGUI(QtGui.QMainWindow):
     def update_text(self):
         self.update_alignment()
         self.update_color()
-        
+    #Function for Goto widget
     def gotoline(self):
         self.ui.Gotowidget.show()
         self.ui.lineNo.setFocus()
@@ -370,7 +331,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         cursor.setPosition(pos)
         self.ui.textEdit.setTextCursor(cursor)
         self.ui.textEdit.setFocus()        
-            
+    #Function for Find Widget
     def find(self):
         if self.ui.Replacewidget.isVisible():
             self.ui.Replacewidget.hide()
@@ -401,7 +362,7 @@ class NepalSCGUI(QtGui.QMainWindow):
                 rotationIncomplete=False
             else:
                 QMessageBox.information(self, "End of Search", "No more occurences of the word can be found.")
-        
+    #Funtion for Replace widget
     def replace(self):
         if self.ui.Findwidget.isVisible():
             self.ui.Findwidget.hide()
@@ -448,7 +409,87 @@ class NepalSCGUI(QtGui.QMainWindow):
                 QMessageBox.information(self, "End of Search", "All occurences replaced.")    
                 break
         cursor.endEditBlock()
-            
+    #Mouse Press Event for QTextEdit
+    def OnMousePressed(self, position):
+        cursor = self.ui.textEdit.cursorForPosition(position)
+        self.ui.textEdit.setTextCursor(cursor)
+    #ContextMenu creator for QtextEdit
+    def showContextMenu(self, position):
+        SuggestionContextMenu = self.ui.textEdit.createStandardContextMenu()
+        cursor=self.ui.textEdit.textCursor()
+        cursor.select(QTextCursor.WordUnderCursor)
+        self.ui.textEdit.setTextCursor(cursor)
+        if self.ui.textEdit.textCursor().hasSelection():
+            a=self.ui.textEdit.textCursor().selectedText()
+            if a[-1]==u'।':
+                a=a.remove(u'।')
+                cursor.movePosition(QTextCursor.Left,QTextCursor.KeepAnchor)
+                self.ui.textEdit.setTextCursor(cursor)
+            text = unicode(a).encode('utf-8')
+            if not self.checker.spell(text):
+                ignoreAction=QAction('Ignore',SuggestionContextMenu)
+                ignoreAction.triggered.connect(self.ignoreSelection)
+                SuggestionContextMenu.insertSeparator(SuggestionContextMenu.actions()[0])
+                SuggestionContextMenu.insertAction(SuggestionContextMenu.actions()[0], ignoreAction)
+                SuggestionMenu = QMenu('Spelling Suggestions')
+                for word in self.checker.suggest(text):
+                    word=word.decode('utf-8')
+                    action = SuggestAction(word, SuggestionMenu)
+                    action.correct.connect(self.replaceCorrect)
+                    SuggestionMenu.addAction(action)
+                if len(SuggestionMenu.actions()) != 0:
+                   SuggestionContextMenu.insertMenu(SuggestionContextMenu.actions()[0], SuggestionMenu)
+        cursor.clearSelection()
+        SuggestionContextMenu.exec_(self.ui.textEdit.mapToGlobal(position))
+        self.ui.textEdit.setTextCursor(cursor)
+    #Function for ignore function
+    def ignoreSelection(self):
+        a=self.ui.textEdit.textCursor().selectedText()
+        if a[-1]==u'।':
+            a=a.remove(u'।')
+            cursor.movePosition(QTextCursor.Left,QTextCursor.KeepAnchor)
+            self.ui.textEdit.setTextCursor(cursor)
+        text = unicode(a).encode('utf-8')
+        print text
+        self.checker.add(text)
+    #Function for SPell Corrector        
+    def replaceCorrect(self, word):
+        cursor = self.ui.textEdit.textCursor()
+        cursor.beginEditBlock()
+        cursor.removeSelectedText()
+        cursor.insertText(word)
+        cursor.endEditBlock()
+#QAction class for all suggestion menus
+class SuggestAction(QAction):
+    correct = pyqtSignal(unicode)
+    def __init__(self, *args):
+        QAction.__init__(self, *args)
+        self.triggered.connect(lambda x: self.correct.emit(self.text()))
+#Highlighter class underlines incorrect words
+class Highlighter(QSyntaxHighlighter):
+    pattern = ur'(?u)\w+' 
+
+    def __init__(self, *args):
+        QSyntaxHighlighter.__init__(self, *args)
+        self.dict = None
+        
+    def setDict(self, dict):
+        self.dict = dict
+        
+    def highlightBlock(self, text):
+        if not self.dict:
+            return
+        if not text:
+            return
+        text = unicode(text)
+        format = QTextCharFormat()
+        format.setUnderlineColor(Qt.red)
+        format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
+        unicode_pattern=regex.compile(self.pattern,regex.UNICODE)
+        for word_object in unicode_pattern.finditer(text):
+            if not self.dict.spell(word_object.group().encode('utf-8')):
+                self.setFormat(word_object.start(), word_object.end() - word_object.start(), format)
+
 if __name__=="__main__":
     app=QtGui.QApplication(sys.argv)
     myapp=NepalSCGUI()

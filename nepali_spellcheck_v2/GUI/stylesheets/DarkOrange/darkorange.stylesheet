@@ -68,6 +68,23 @@ QMenu::item:selected
     color: #000000;
 }
 
+QMenu::tearoff
+{
+    border: 1px solid #000;
+    spacing: 15px;
+}
+
+QMenu::tearoff::item
+{
+    padding: 2px 5px 2px 24px;
+    spacing: 30px;
+}
+
+QMenu::tearoff::item:selected
+{
+    color: #000000;
+}
+
 QWidget:disabled
 {
     color: #404040;
@@ -327,6 +344,7 @@ QMainWindow::separator:hover
     padding-left: 4px;
     border: 1px solid #6c6c6c;
     spacing: 3px; /* spacing between items in the tool bar */
+
 
 
 

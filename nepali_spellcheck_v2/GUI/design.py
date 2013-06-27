@@ -8,11 +8,23 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.Qt import QTextEdit
+from PyQt4.QtCore import *
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
+
+class MyTextEdit(QTextEdit):
+    mousePressedSignal = pyqtSignal(QPoint)
+    def __init__(self, *args):
+        QTextEdit.__init__(self, *args)
+
+    def mousePressEvent(self, event):
+        pos = event.pos()
+        self.mousePressedSignal.emit(pos)
 
 class Ui_Spellcheck(object):
     def setupUi(self, Spellcheck):
@@ -33,7 +45,7 @@ class Ui_Spellcheck(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
-        self.textEdit = QtGui.QTextEdit(self.centralwidget)
+        self.textEdit = MyTextEdit(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(10)
         sizePolicy.setVerticalStretch(10)
