@@ -23,29 +23,17 @@ $ sudo apt-get install python-dev libhunspell ibus-qt pyqt4
 ######installing pyhunspell
 ```bash
 $ cd path_to_spellchecker/pyhunspell
-$ sudo python setup.py install
+$ sudo python2 setup.py install
 ```
 
 ######installing regex
 if you have _setuptools_ or _pip_ already installed use:
 ```bash
-$ easy_install regex
+$ sudo easy_install-2.7 regex
 ```
 or
 ```bash
-$ pip regex
-```
-
-else follow the following steps:
-
-1. download the tar from [here][regexpypi]
-2. cd into download directory
-3. type in the following
-
-```bash
-$ tar -zxvf regex-2013-06-26.tar.gz
-$ cd regex-2013-06-26
-$ sudo python setup.py install
+$ sudo pip-2.7 regex
 ```
 
 ###How To Use
@@ -66,4 +54,3 @@ Please post it into [issue][issue] with label ***FAQ***
 [qt4]: http://www.riverbankcomputing.com/software/pyqt/download
 [pyhunspell]: https://github.com/akshaylb/nepali-spellchecker-v2/tree/master/pyhunspell
 [regex]: https://pypi.python.org/pypi/regex
-[regexpypi]: https://pypi.python.org/packages/source/r/regex/regex-2013-06-26.tar.gz
