@@ -29,6 +29,8 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.textEdit.setContextMenuPolicy(Qt.CustomContextMenu)
         self.ui.textEdit.customContextMenuRequested.connect(self.showContextMenu)
         self.ui.textEdit.mousePressedSignal.connect(self.OnMousePressed)
+        self.ui.textEdit.setAttribute(QtCore.Qt.WA_InputMethodEnabled, True) 
+        
         for i in range(1,3):
             self.ui.textEdit.zoomIn()
         #self.importCSS('DarkOrange/darkorange.stylesheet')
