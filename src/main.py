@@ -13,7 +13,11 @@ import resources
 import webbrowser
 import hunspell
 import regex
-
+from email.header import Header
+from email.mime.text import MIMEText
+from getpass import getpass
+from smtplib import SMTP_SSL, SMTPException
+import base64
 
 class NepalSCGUI(QtGui.QMainWindow):
     def __init__(self,parent=None):
@@ -30,7 +34,6 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.textEdit.customContextMenuRequested.connect(self.showContextMenu)
         self.ui.textEdit.mousePressedSignal.connect(self.OnMousePressed)
         self.ui.textEdit.setAttribute(QtCore.Qt.WA_InputMethodEnabled, True) 
-        
         for i in range(1,3):
             self.ui.textEdit.zoomIn()
         #self.importCSS('DarkOrange/darkorange.stylesheet')
@@ -119,6 +122,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionGoto.triggered.connect(self.gotoline)
         self.ui.actionSearch.triggered.connect(self.find)
         self.ui.actionReplace.triggered.connect(self.replace)
+        self.ui.actionBug.triggered.connect(self.BugReport)
         self.watcher.fileChanged.connect(self.file_changed)
         self.mppAction.triggered.connect(self.open_mpp)
         self.EscAction = QtGui.QShortcut(QtGui.QKeySequence(self.tr("Esc")), self);
@@ -141,6 +145,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.Gotowidget.hide()
         self.ui.Findwidget.hide()
         self.ui.Replacewidget.hide()
+        self.ui.Bugwidget.hide()
         self.ui.textEdit.setFocus()
     #Defines Button Actions
     def defineButton(self,button, Icon, Raise, Check, Shortcut, Tooltip, Action):
@@ -318,6 +323,8 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.update_color()
     #Function for Goto widget
     def gotoline(self):
+        if self.ui.Replacewidget.isVisible() or self.ui.Bugwidget.isVisible() or self.ui.Findwidget.isVisible():
+            self.hidewidgets()
         self.ui.Gotowidget.show()
         self.ui.lineNo.setFocus()
         self.ui.lineNo.returnPressed.connect(self.gotoaction)
@@ -335,8 +342,8 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.textEdit.setFocus()        
     #Function for Find Widget
     def find(self):
-        if self.ui.Replacewidget.isVisible():
-            self.ui.Replacewidget.hide()
+        if self.ui.Replacewidget.isVisible() or self.ui.Bugwidget.isVisible() or self.ui.Gotowidget.isVisible():
+            self.hidewidgets()
         self.ui.Findwidget.show()
         self.ui.SearchKey.setFocus()
         self.ui.SearchKey.returnPressed.connect(self.doFind)
@@ -366,8 +373,8 @@ class NepalSCGUI(QtGui.QMainWindow):
                 QMessageBox.information(self, "End of Search", "No more occurences of the word can be found.")
     #Funtion for Replace widget
     def replace(self):
-        if self.ui.Findwidget.isVisible():
-            self.ui.Findwidget.hide()
+        if self.ui.Findwidget.isVisible() or self.ui.Bugwidget.isVisible() or self.ui.Gotowidget.isVisible():
+            self.hidewidgets()
         self.ui.Replacewidget.show()
         self.ui.OldText.setFocus()
         self.ui.OldText.returnPressed.connect(self.doFind)
@@ -411,6 +418,40 @@ class NepalSCGUI(QtGui.QMainWindow):
                 QMessageBox.information(self, "End of Search", "All occurences replaced.")    
                 break
         cursor.endEditBlock()
+    #Function to enable Bugwidget
+    def BugReport(self):
+        if self.ui.Replacewidget.isVisible() or self.ui.Findwidget.isVisible() or self.ui.Gotowidget.isVisible():
+            self.hidewidgets()
+        self.ui.Bugwidget.show()
+        self.ui.BugType.setFocus()
+        self.ui.ReportButton.clicked.connect(self.bugsend)
+    #Function to email Bug Report
+    def bugsend(self):
+        login, password = 'nepalispellcheck@gmail.com', 'silverlines'
+        subject = 'Bug Report - ' + unicode(self.ui.BugType.text())
+        text = unicode(self.ui.BugDetail.toPlainText())
+        msg=MIMEText(text, _charset='utf-8')
+        msg['Subject'] = Header(subject, 'utf-8')
+        msg['From'] = login
+        msg['To'] = login
+        try:
+            s=SMTP_SSL('smtp.gmail.com', 465, timeout=10)
+            s.set_debuglevel(0)
+            s.login(login, password)
+            s.sendmail(msg['From'], msg['To'], msg.as_string())
+            res=QMessageBox.about(self, "%s" %self.objectName(),"Bug Report Successful.")
+            if res == QMessageBox.Ok:
+                s.quit()
+                return
+        except Exception, e:
+            res=QMessageBox.about(self, "%s" %self.objectName(),"Bug Report unuccessful.\nPlease check your internet connection. \n\n Error Details: %s" % e)
+            if res == QMessageBox.Ok:
+                s.quit()
+                return
+        finally:
+            self.hidewidgets()
+            self.ui.textEdit.setFocus()
+
     #Mouse Press Event for QTextEdit
     def OnMousePressed(self, position):
         cursor = self.ui.textEdit.cursorForPosition(position)

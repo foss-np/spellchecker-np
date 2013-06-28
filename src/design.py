@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'design.ui'
 #
-# Created: Mon Jun 24 00:28:43 2013
+# Created: Sat Jun 29 00:31:10 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,7 +25,7 @@ class MyTextEdit(QTextEdit):
     def mousePressEvent(self, event):
         pos = event.pos()
         self.mousePressedSignal.emit(pos)
-
+                
 class Ui_Spellcheck(object):
     def setupUi(self, Spellcheck):
         Spellcheck.setObjectName(_fromUtf8("Spellcheck"))
@@ -55,6 +55,30 @@ class Ui_Spellcheck(object):
         self.textEdit.setFrameShape(QtGui.QFrame.NoFrame)
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
         self.verticalLayout.addWidget(self.textEdit)
+        self.Bugwidget = QtGui.QWidget(self.centralwidget)
+        self.Bugwidget.setObjectName(_fromUtf8("Bugwidget"))
+        self.gridLayout_2 = QtGui.QGridLayout(self.Bugwidget)
+        self.gridLayout_2.setMargin(0)
+        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
+        self.label_6 = QtGui.QLabel(self.Bugwidget)
+        self.label_6.setObjectName(_fromUtf8("label_6"))
+        self.gridLayout_2.addWidget(self.label_6, 3, 0, 1, 1)
+        self.BugType = QtGui.QLineEdit(self.Bugwidget)
+        self.BugType.setObjectName(_fromUtf8("BugType"))
+        self.gridLayout_2.addWidget(self.BugType, 0, 3, 1, 1)
+        self.label_5 = QtGui.QLabel(self.Bugwidget)
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.gridLayout_2.addWidget(self.label_5, 0, 0, 1, 1)
+        self.ReportButton = QtGui.QPushButton(self.Bugwidget)
+        self.ReportButton.setObjectName(_fromUtf8("ReportButton"))
+        self.gridLayout_2.addWidget(self.ReportButton, 0, 4, 1, 1)
+        self.label_7 = QtGui.QLabel(self.Bugwidget)
+        self.label_7.setObjectName(_fromUtf8("label_7"))
+        self.gridLayout_2.addWidget(self.label_7, 4, 3, 1, 1)
+        self.BugDetail = QtGui.QTextEdit(self.Bugwidget)
+        self.BugDetail.setObjectName(_fromUtf8("BugDetail"))
+        self.gridLayout_2.addWidget(self.BugDetail, 3, 3, 1, 2)
+        self.verticalLayout.addWidget(self.Bugwidget)
         self.Findwidget = QtGui.QWidget(self.centralwidget)
         self.Findwidget.setObjectName(_fromUtf8("Findwidget"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.Findwidget)
@@ -186,11 +210,11 @@ class Ui_Spellcheck(object):
         icon7.addPixmap(QtGui.QPixmap(_fromUtf8("Resources/Paste.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionPaste.setIcon(icon7)
         self.actionPaste.setObjectName(_fromUtf8("actionPaste"))
-        self.actionUpdate = QtGui.QAction(Spellcheck)
+        self.actionBug = QtGui.QAction(Spellcheck)
         icon8 = QtGui.QIcon()
         icon8.addPixmap(QtGui.QPixmap(_fromUtf8("Resources/Update.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.actionUpdate.setIcon(icon8)
-        self.actionUpdate.setObjectName(_fromUtf8("actionUpdate"))
+        self.actionBug.setIcon(icon8)
+        self.actionBug.setObjectName(_fromUtf8("actionBug"))
         self.actionAbout = QtGui.QAction(Spellcheck)
         icon9 = QtGui.QIcon()
         icon9.addPixmap(QtGui.QPixmap(_fromUtf8("Resources/About.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -238,7 +262,7 @@ class Ui_Spellcheck(object):
         self.menuEdit.addAction(self.actionCut)
         self.menuEdit.addAction(self.actionCopy)
         self.menuEdit.addAction(self.actionPaste)
-        self.menuHelp.addAction(self.actionUpdate)
+        self.menuHelp.addAction(self.actionBug)
         self.menuHelp.addAction(self.actionAbout)
         self.menuTools.addAction(self.actionSearch)
         self.menuTools.addAction(self.actionReplace)
@@ -264,9 +288,16 @@ class Ui_Spellcheck(object):
         Spellcheck.setTabOrder(self.r_all, self.replace)
         Spellcheck.setTabOrder(self.replace, self.lineNo)
         Spellcheck.setTabOrder(self.lineNo, self.GoButton)
+        Spellcheck.setTabOrder(self.GoButton, self.BugType)
+        Spellcheck.setTabOrder(self.BugType, self.BugDetail)
+        Spellcheck.setTabOrder(self.BugDetail, self.ReportButton)
 
     def retranslateUi(self, Spellcheck):
         Spellcheck.setWindowTitle(QtGui.QApplication.translate("Spellcheck", "Nepali SpellChecker v2.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_6.setText(QtGui.QApplication.translate("Spellcheck", "Bug Description", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_5.setText(QtGui.QApplication.translate("Spellcheck", "Bug Type", None, QtGui.QApplication.UnicodeUTF8))
+        self.ReportButton.setText(QtGui.QApplication.translate("Spellcheck", " Report Bug", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(QtGui.QApplication.translate("Spellcheck", "Please ensure that you have a working internet connection.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Spellcheck", "Find              ", None, QtGui.QApplication.UnicodeUTF8))
         self.MatchCase.setText(QtGui.QApplication.translate("Spellcheck", "Match Case", None, QtGui.QApplication.UnicodeUTF8))
         self.next.setText(QtGui.QApplication.translate("Spellcheck", "Find Next", None, QtGui.QApplication.UnicodeUTF8))
@@ -308,8 +339,7 @@ class Ui_Spellcheck(object):
         self.actionPaste.setText(QtGui.QApplication.translate("Spellcheck", "&Paste               ", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPaste.setStatusTip(QtGui.QApplication.translate("Spellcheck", "Paste copied text", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPaste.setShortcut(QtGui.QApplication.translate("Spellcheck", "Ctrl+V", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionUpdate.setText(QtGui.QApplication.translate("Spellcheck", "&Update              ", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionUpdate.setShortcut(QtGui.QApplication.translate("Spellcheck", "Ctrl+Shift+U", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBug.setText(QtGui.QApplication.translate("Spellcheck", "Report &Bug          ", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAbout.setText(QtGui.QApplication.translate("Spellcheck", "&About", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSaveAs.setText(QtGui.QApplication.translate("Spellcheck", "Save &As             ", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSaveAs.setShortcut(QtGui.QApplication.translate("Spellcheck", "Ctrl+Shift+S", None, QtGui.QApplication.UnicodeUTF8))
