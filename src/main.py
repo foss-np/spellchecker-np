@@ -431,7 +431,10 @@ class NepalSCGUI(QtGui.QMainWindow):
             if not self.checker.spell(text):
                 ignoreAction=QAction('Ignore',SuggestionContextMenu)
                 ignoreAction.triggered.connect(self.ignoreSelection)
+                addAction=QAction('Add to Dictionary',SuggestionContextMenu)
+                addAction.triggered.connect(self.addWord)
                 SuggestionContextMenu.insertSeparator(SuggestionContextMenu.actions()[0])
+                SuggestionContextMenu.insertAction(SuggestionContextMenu.actions()[0], addAction)
                 SuggestionContextMenu.insertAction(SuggestionContextMenu.actions()[0], ignoreAction)
                 SuggestionMenu = QMenu('Spelling Suggestions')
                 for word in self.checker.suggest(text):
@@ -452,7 +455,6 @@ class NepalSCGUI(QtGui.QMainWindow):
             cursor.movePosition(QTextCursor.Left,QTextCursor.KeepAnchor)
             self.ui.textEdit.setTextCursor(cursor)
         text = unicode(a).encode('utf-8')
-        print text
         self.checker.add(text)
     #Function for SPell Corrector        
     def replaceCorrect(self, word):
@@ -461,6 +463,23 @@ class NepalSCGUI(QtGui.QMainWindow):
         cursor.removeSelectedText()
         cursor.insertText(word)
         cursor.endEditBlock()
+    #aAdd new words to dic file
+    def addWord(self):
+        a=self.ui.textEdit.textCursor().selectedText()
+        if a[-1]==u'।':
+            a=a.remove(u'।')
+            cursor.movePosition(QTextCursor.Left,QTextCursor.KeepAnchor)
+            self.ui.textEdit.setTextCursor(cursor)
+        text = unicode(a)
+        dictionary = codecs.open('hunspell/ne_NP.dic','r','utf-8').read()
+        words=dictionary.split('\n')
+        words.append(text)
+        words[0]=unicode(len(words)-2)
+        dictionary = codecs.open('hunspell/ne_NP.dic','w','utf-8')
+        dictionary.write(u'\n'.join(words))
+        dictionary.close()
+        self.checker=hunspell.HunSpell('hunspell/ne_NP.dic','hunspell/ne_NP.aff')
+        self.highlighter.setDict(self.checker)
 #QAction class for all suggestion menus
 class SuggestAction(QAction):
     correct = pyqtSignal(unicode)
