@@ -7,7 +7,6 @@ from PyQt4.QtGui import QMessageBox, QApplication, QMainWindow, QFileDialog
 from PyQt4.QtCore import *
 from design import Ui_Spellcheck
 import codecs
-import codecs
 from os.path import isfile
 import resources
 import webbrowser
@@ -36,8 +35,6 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.textEdit.setAttribute(QtCore.Qt.WA_InputMethodEnabled, True) 
         for i in range(1,3):
             self.ui.textEdit.zoomIn()
-        #self.importCSS('DarkOrange/darkorange.stylesheet')
-        #self.importCSS('qdarkstyle/style.qss')
         #Define actions for toolbar         
         self.mppAction = QtGui.QAction(QtGui.QIcon('Resources/mpplogo.gif'), 'Madan Puraskar Pustakalaya', self)
         self.newAction = QtGui.QAction(QtGui.QIcon('Resources/New.png'), 'New', self)
@@ -113,6 +110,7 @@ class NepalSCGUI(QtGui.QMainWindow):
         self.ui.actionOpen.triggered.connect(self.file_open)
         self.ui.actionNew.triggered.connect(self.file_new)
         self.ui.actionSave.triggered.connect(self.file_save)
+        self.ui.actionSaveAs.triggered.connect(self.file_saveAs)
         self.ui.textEdit.textChanged.connect(self.save_enable)
         self.ui.actionCut.triggered.connect(self.ui.textEdit.cut)
         self.ui.actionCopy.triggered.connect(self.ui.textEdit.copy)
@@ -530,11 +528,12 @@ class SuggestAction(QAction):
 #Highlighter class underlines incorrect words
 class Highlighter(QSyntaxHighlighter):
     pattern = ur'(?u)\w+' 
-
+    
     def __init__(self, *args):
         QSyntaxHighlighter.__init__(self, *args)
         self.dict = None
-        
+        self.errorcount=0
+
     def setDict(self, dict):
         self.dict = dict
         
@@ -543,14 +542,20 @@ class Highlighter(QSyntaxHighlighter):
             return
         if not text:
             return
-        text = unicode(text)
+        txt = unicode(text)
+        #if len(txt.split())==1:
+        #    txt=""
+        #else:
+        #    txt=txt.rsplit(' ',1)[0]            
         format = QTextCharFormat()
         format.setUnderlineColor(Qt.red)
         format.setUnderlineStyle(QTextCharFormat.SpellCheckUnderline)
         unicode_pattern=regex.compile(self.pattern,regex.UNICODE)
-        for word_object in unicode_pattern.finditer(text):
+        for word_object in unicode_pattern.finditer(txt):
             if not self.dict.spell(word_object.group().encode('utf-8')):
                 self.setFormat(word_object.start(), word_object.end() - word_object.start(), format)
+                self.errorcount+=1
+        print self.errorcount
 
 if __name__=="__main__":
     app=QtGui.QApplication(sys.argv)
