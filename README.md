@@ -13,11 +13,19 @@ A small standalone Nepali Spellchecker based on Hunspell's.
 Hunspell to Check Spellings of Nepali unicode.
 It is *MANDATORY* for the **'ne_NP.dic'** file and the **'ne_NP.aff'** file to be present inside the hunspell directory.
 
-#### How to Install Packages
+#### How to Install
+
+Download the source files using
+```bash
+$ wget https://github.com/akshaylb/nepali-spellchecker-v2/archive/master.zip
+or
+$ wget https://github.com/akshaylb/nepali-spellchecker-v2/archive/master.tar.gz
+```
+
 
 ###### installing pre-requisite packages
 ```bash
-$ sudo apt-get install python-dev libhunspell ibus-qt pyqt4
+$ sudo apt-get install python2.7-dev libhunspell ibus-qt python-qt4
 ```
 
 ###### installing pyhunspell
@@ -43,7 +51,7 @@ After successful installation of prerequisite modules
 open the terminal
 ```bash
 $ cd path_to_spellchecker/src
-$ python2 main.py
+$ make
 ```
 ===
 
