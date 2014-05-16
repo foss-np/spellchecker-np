@@ -17,9 +17,9 @@ It is *MANDATORY* for the **'ne_NP.dic'** file and the **'ne_NP.aff'** file to b
 
 Download the source files using
 ```bash
-$ wget https://github.com/akshaylb/nepali-spellchecker-v2/archive/master.zip
+$ wget https://github.com/foss-np/spellchecker-np/archive/master.zip
 or
-$ wget https://github.com/akshaylb/nepali-spellchecker-v2/archive/master.tar.gz
+$ wget https://github.com/foss-np/spellchecker-np/archive/master.tar.gz
 ```
 
 
